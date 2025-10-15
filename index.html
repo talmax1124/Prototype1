@@ -87,6 +87,18 @@
                         </select>
                     </div>
                 </div>
+                <div class="results-header" id="results-header" style="display: none;">
+                    <div class="results-count" id="results-count"></div>
+                    <div class="sort-options">
+                        <label for="sort-select">Sort by:</label>
+                        <select id="sort-select" class="sort-select">
+                            <option value="posted">Most Recent</option>
+                            <option value="title">Job Title</option>
+                            <option value="company">Company</option>
+                            <option value="salary">Salary</option>
+                        </select>
+                    </div>
+                </div>
                 <div id="job-listings" class="job-listings">
                     <!-- Job listings will be populated by JavaScript -->
                 </div>
@@ -211,6 +223,54 @@
             </div>
         </div>
     </footer>
+
+    <!-- Feedback Chat Bubble -->
+    <div id="feedback-bubble" class="feedback-bubble">
+        <button id="feedback-toggle" class="feedback-toggle">
+            <i class="fas fa-comment"></i>
+        </button>
+        <div id="feedback-panel" class="feedback-panel">
+            <div class="feedback-header">
+                <h4>Send Feedback</h4>
+                <button id="feedback-close" class="feedback-close">&times;</button>
+            </div>
+            <div class="feedback-body">
+                <form id="feedback-form">
+                    <div class="form-group">
+                        <label for="feedback-type">Feedback Type:</label>
+                        <select id="feedback-type" required>
+                            <option value="">Select type...</option>
+                            <option value="bug">Bug Report</option>
+                            <option value="feature">Feature Request</option>
+                            <option value="improvement">Improvement Suggestion</option>
+                            <option value="general">General Feedback</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="feedback-message">Your Feedback:</label>
+                        <textarea id="feedback-message" rows="4" placeholder="Tell us what you think..." required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="feedback-email">Email (optional):</label>
+                        <input type="email" id="feedback-email" placeholder="your.email@example.com">
+                    </div>
+                    <div class="feedback-actions">
+                        <button type="submit">Send Feedback</button>
+                    </div>
+                </form>
+                <div id="feedback-success" class="feedback-success" style="display: none;">
+                    <i class="fas fa-check-circle"></i>
+                    <h4>Thank you!</h4>
+                    <p>Your feedback has been submitted successfully.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scroll to Top Button -->
+    <button id="scroll-to-top" class="scroll-to-top">
+        <i class="fas fa-arrow-up"></i>
+    </button>
 
     <script src="script.js"></script>
 </body>

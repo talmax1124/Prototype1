@@ -1,126 +1,234 @@
-// Sample job data
-const jobListings = [
-    {
-        id: 1,
-        title: "Software Engineering Intern",
-        company: "Tech Solutions Inc.",
-        location: "Jacksonville, FL",
-        type: "internship",
-        major: "computer-science",
-        description: "Join our development team to work on cutting-edge web applications. Perfect for computer science students looking to gain real-world experience.",
-        tags: ["JavaScript", "React", "Node.js", "Internship"],
-        salary: "$18-22/hour",
-        posted: "2 days ago"
-    },
-    {
-        id: 2,
-        title: "Marketing Assistant",
-        company: "Digital Marketing Pro",
-        location: "Remote",
-        type: "part-time",
-        major: "business",
-        description: "Support our marketing team with social media campaigns, content creation, and market research. Great opportunity for business students.",
-        tags: ["Marketing", "Social Media", "Content Creation", "Remote"],
-        salary: "$15-18/hour",
-        posted: "1 day ago"
-    },
-    {
-        id: 3,
-        title: "Elementary Teaching Assistant",
-        company: "Duval County Schools",
-        location: "Jacksonville, FL",
-        type: "part-time",
-        major: "education",
-        description: "Assist teachers in classroom management and student support. Perfect for education majors gaining classroom experience.",
-        tags: ["Education", "Teaching", "Student Support", "Part-time"],
-        salary: "$12-15/hour",
-        posted: "3 days ago"
-    },
-    {
-        id: 4,
-        title: "Mechanical Engineering Co-op",
-        company: "Aerospace Dynamics",
-        location: "Orlando, FL",
-        type: "internship",
-        major: "engineering",
-        description: "6-month co-op program working on aircraft component design and testing. Hands-on experience with CAD software and prototyping.",
-        tags: ["Engineering", "CAD", "Aerospace", "Co-op"],
-        salary: "$20-25/hour",
-        posted: "1 week ago"
-    },
-    {
-        id: 5,
-        title: "Graphic Design Intern",
-        company: "Creative Studio Jacksonville",
-        location: "Jacksonville, FL",
-        type: "internship",
-        major: "arts",
-        description: "Work with our creative team on branding projects, web design, and print materials. Build your portfolio while gaining professional experience.",
-        tags: ["Design", "Photoshop", "Branding", "Creative"],
-        salary: "$14-17/hour",
-        posted: "4 days ago"
-    },
-    {
-        id: 6,
-        title: "Business Analyst Trainee",
-        company: "Financial Services Corp",
-        location: "Jacksonville, FL",
-        type: "entry-level",
-        major: "business",
-        description: "Entry-level position analyzing business processes and supporting decision-making. Great stepping stone for recent graduates.",
-        tags: ["Analytics", "Excel", "Business Process", "Entry Level"],
-        salary: "$45,000-50,000/year",
-        posted: "5 days ago"
-    },
-    {
-        id: 7,
-        title: "Nursing Student Extern",
-        company: "UF Health Jacksonville",
-        location: "Jacksonville, FL",
-        type: "internship",
-        major: "health-sciences",
-        description: "Gain hands-on clinical experience in our state-of-the-art medical facility. Perfect for nursing students in their final year.",
-        tags: ["Healthcare", "Nursing", "Clinical", "Hospital"],
-        salary: "$16-19/hour",
-        posted: "2 days ago"
-    },
-    {
-        id: 8,
-        title: "Junior Web Developer",
-        company: "StartupTech",
-        location: "Remote",
-        type: "entry-level",
-        major: "computer-science",
-        description: "Join our fast-growing startup to develop web applications. Remote-friendly position with mentorship opportunities.",
-        tags: ["JavaScript", "Python", "Web Development", "Startup"],
-        salary: "$50,000-60,000/year",
-        posted: "1 day ago"
-    },
-    {
-        id: 9,
-        title: "Public Administration Intern",
-        company: "City of Jacksonville",
-        location: "Jacksonville, FL",
-        type: "internship",
-        major: "public",
-        description: "Support city planning and public policy initiatives. Ideal for students interested in government and public service.",
-        tags: ["Government", "Public Policy", "Administration", "Civic"],
-        salary: "$15-18/hour",
-        posted: "6 days ago"
-    },
-    {
-        id: 10,
-        title: "Data Science Intern",
-        company: "Analytics Plus",
-        location: "Tampa, FL",
-        type: "internship",
-        major: "computer-science",
-        description: "Work with big data and machine learning algorithms. Experience with Python, R, and statistical analysis required.",
-        tags: ["Data Science", "Python", "Machine Learning", "Analytics"],
-        salary: "$22-26/hour",
-        posted: "3 days ago"
+// Job listings data - will be populated from API
+let jobListings = [];
+
+// Job API service
+class JobService {
+    constructor() {
+        this.baseURL = 'https://remotive.io/api/remote-jobs';
+        this.fallbackJobs = this.generateFallbackJobs();
     }
-];
+
+    async fetchJobs(location = 'jacksonville', limit = 50) {
+        try {
+            // Fetch from Remotive API (for remote jobs)
+            const remoteResponse = await fetch(`${this.baseURL}?limit=${limit}`);
+            if (!remoteResponse.ok) throw new Error('Remote API failed');
+            
+            const remoteData = await remoteResponse.json();
+            const remoteJobs = this.transformRemoteJobs(remoteData.jobs || []);
+
+            // Combine with local Jacksonville jobs
+            const localJobs = this.generateJacksonvilleJobs();
+            
+            return [...localJobs, ...remoteJobs.slice(0, 30)];
+        } catch (error) {
+            console.warn('API fetch failed, using fallback data:', error);
+            return this.fallbackJobs;
+        }
+    }
+
+    transformRemoteJobs(jobs) {
+        return jobs.map((job, index) => ({
+            id: `remote_${index + 1000}`,
+            title: job.title || 'Remote Position',
+            company: job.company_name || 'Remote Company',
+            location: 'Remote',
+            type: this.inferJobType(job.title),
+            major: this.inferMajor(job.title, job.description),
+            description: job.description ? job.description.substring(0, 200) + '...' : 'Remote opportunity with flexible working arrangements.',
+            tags: this.extractTags(job.title, job.description),
+            salary: job.salary || 'Competitive',
+            posted: this.formatDate(job.publication_date) || 'Recently posted',
+            url: job.url
+        }));
+    }
+
+    generateJacksonvilleJobs() {
+        return [
+            {
+                id: 1,
+                title: "Software Engineering Intern",
+                company: "Tech Solutions Jacksonville",
+                location: "Jacksonville, FL",
+                type: "internship",
+                major: "computer-science",
+                description: "Join our development team to work on cutting-edge web applications. Perfect for computer science students looking to gain real-world experience in Jacksonville's growing tech scene.",
+                tags: ["JavaScript", "React", "Node.js", "Internship"],
+                salary: "$18-22/hour",
+                posted: "2 days ago"
+            },
+            {
+                id: 2,
+                title: "Marketing Coordinator",
+                company: "Jacksonville Digital Agency",
+                location: "Jacksonville, FL",
+                type: "entry-level",
+                major: "business",
+                description: "Support our marketing team with campaigns, content creation, and market research. Located in downtown Jacksonville with great growth opportunities.",
+                tags: ["Marketing", "Social Media", "Content Creation", "Digital"],
+                salary: "$35,000-42,000/year",
+                posted: "1 day ago"
+            },
+            {
+                id: 3,
+                title: "Elementary Teaching Assistant",
+                company: "Duval County Schools",
+                location: "Jacksonville, FL",
+                type: "part-time",
+                major: "education",
+                description: "Assist teachers in classroom management and student support. Perfect for education majors gaining classroom experience in Duval County.",
+                tags: ["Education", "Teaching", "Student Support", "Part-time"],
+                salary: "$12-15/hour",
+                posted: "3 days ago"
+            },
+            {
+                id: 4,
+                title: "Business Analyst Trainee",
+                company: "CSX Transportation",
+                location: "Jacksonville, FL",
+                type: "entry-level",
+                major: "business",
+                description: "Entry-level position analyzing business processes at CSX headquarters. Great stepping stone for recent graduates in Jacksonville.",
+                tags: ["Analytics", "Excel", "Transportation", "Entry Level"],
+                salary: "$48,000-55,000/year",
+                posted: "5 days ago"
+            },
+            {
+                id: 5,
+                title: "Nursing Student Extern",
+                company: "UF Health Jacksonville",
+                location: "Jacksonville, FL",
+                type: "internship",
+                major: "health-sciences",
+                description: "Gain hands-on clinical experience in our state-of-the-art medical facility. Perfect for nursing students in their final year.",
+                tags: ["Healthcare", "Nursing", "Clinical", "Hospital"],
+                salary: "$16-19/hour",
+                posted: "2 days ago"
+            },
+            {
+                id: 6,
+                title: "Graphic Design Intern",
+                company: "VyStar Credit Union",
+                location: "Jacksonville, FL",
+                type: "internship",
+                major: "arts",
+                description: "Work with our creative team on branding projects and marketing materials. Build your portfolio while gaining professional experience.",
+                tags: ["Design", "Photoshop", "Branding", "Creative"],
+                salary: "$14-17/hour",
+                posted: "4 days ago"
+            },
+            {
+                id: 7,
+                title: "Public Administration Intern",
+                company: "City of Jacksonville",
+                location: "Jacksonville, FL",
+                type: "internship",
+                major: "public",
+                description: "Support city planning and public policy initiatives. Ideal for students interested in government and public service.",
+                tags: ["Government", "Public Policy", "Administration", "Civic"],
+                salary: "$15-18/hour",
+                posted: "6 days ago"
+            },
+            {
+                id: 8,
+                title: "Financial Analyst Intern",
+                company: "Fidelity National Financial",
+                location: "Jacksonville, FL",
+                type: "internship",
+                major: "business",
+                description: "Gain experience in financial analysis and reporting at one of Jacksonville's major financial services companies.",
+                tags: ["Finance", "Analysis", "Reporting", "Financial Services"],
+                salary: "$20-24/hour",
+                posted: "1 week ago"
+            },
+            {
+                id: 9,
+                title: "Mechanical Engineering Co-op",
+                company: "Anheuser-Busch",
+                location: "Jacksonville, FL",
+                type: "internship",
+                major: "engineering",
+                description: "6-month co-op program working on manufacturing processes and equipment optimization at our Jacksonville brewery.",
+                tags: ["Engineering", "Manufacturing", "Process Improvement", "Co-op"],
+                salary: "$20-25/hour",
+                posted: "1 week ago"
+            },
+            {
+                id: 10,
+                title: "Communications Specialist",
+                company: "Jacksonville University",
+                location: "Jacksonville, FL",
+                type: "part-time",
+                major: "arts",
+                description: "Support university communications and marketing efforts. Great opportunity for communications or journalism students.",
+                tags: ["Communications", "Marketing", "University", "Writing"],
+                salary: "$15-18/hour",
+                posted: "3 days ago"
+            }
+        ];
+    }
+
+    generateFallbackJobs() {
+        return this.generateJacksonvilleJobs();
+    }
+
+    inferJobType(title) {
+        const titleLower = title.toLowerCase();
+        if (titleLower.includes('intern') || titleLower.includes('co-op') || titleLower.includes('extern')) return 'internship';
+        if (titleLower.includes('entry') || titleLower.includes('junior') || titleLower.includes('trainee')) return 'entry-level';
+        if (titleLower.includes('part-time') || titleLower.includes('part time')) return 'part-time';
+        return 'full-time';
+    }
+
+    inferMajor(title, description = '') {
+        const text = (title + ' ' + description).toLowerCase();
+        if (text.includes('software') || text.includes('developer') || text.includes('programming') || text.includes('coding')) return 'computer-science';
+        if (text.includes('business') || text.includes('marketing') || text.includes('finance') || text.includes('analyst')) return 'business';
+        if (text.includes('engineering') || text.includes('engineer')) return 'engineering';
+        if (text.includes('teaching') || text.includes('education') || text.includes('tutor')) return 'education';
+        if (text.includes('health') || text.includes('medical') || text.includes('nurse') || text.includes('clinical')) return 'health-sciences';
+        if (text.includes('design') || text.includes('creative') || text.includes('art') || text.includes('communication')) return 'arts';
+        if (text.includes('public') || text.includes('government') || text.includes('policy') || text.includes('administration')) return 'public';
+        return 'business';
+    }
+
+    extractTags(title, description = '') {
+        const text = (title + ' ' + description).toLowerCase();
+        const tags = [];
+        
+        const techTags = ['javascript', 'python', 'react', 'node.js', 'java', 'sql', 'html', 'css'];
+        const businessTags = ['marketing', 'analytics', 'excel', 'finance', 'sales'];
+        const generalTags = ['remote', 'internship', 'entry level', 'part-time', 'full-time'];
+        
+        [...techTags, ...businessTags, ...generalTags].forEach(tag => {
+            if (text.includes(tag.toLowerCase())) {
+                tags.push(tag.charAt(0).toUpperCase() + tag.slice(1));
+            }
+        });
+        
+        return tags.length > 0 ? tags.slice(0, 4) : ['Opportunity'];
+    }
+
+    formatDate(dateString) {
+        if (!dateString) return null;
+        try {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffTime = Math.abs(now - date);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays === 1) return '1 day ago';
+            if (diffDays < 7) return `${diffDays} days ago`;
+            if (diffDays < 14) return '1 week ago';
+            return `${Math.ceil(diffDays / 7)} weeks ago`;
+        } catch {
+            return 'Recently posted';
+        }
+    }
+}
+
+// Initialize job service
+const jobService = new JobService();
 
 // Major categories data
 const majorCategories = {
@@ -235,9 +343,23 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
 });
 
-function initializeApp() {
+async function initializeApp() {
     setupEventListeners();
-    displayJobListings(jobListings);
+    
+    // Show loading state
+    jobListingsContainer.innerHTML = '<div class="loading">Loading job opportunities...</div>';
+    
+    try {
+        // Fetch actual jobs
+        jobListings = await jobService.fetchJobs('jacksonville');
+        displayJobListings(jobListings);
+    } catch (error) {
+        console.error('Failed to load jobs:', error);
+        // Use fallback data if fetch fails
+        jobListings = jobService.fallbackJobs;
+        displayJobListings(jobListings);
+    }
+    
     displayMajorCategory('all');
     updateJobCounts();
 }
@@ -291,6 +413,48 @@ function setupEventListeners() {
     
     // Scroll spy for navigation
     window.addEventListener('scroll', updateActiveNavOnScroll);
+    
+    // Feedback chat bubble
+    setupFeedbackListeners();
+    
+    // Sorting functionality
+    setupSortingListeners();
+    
+    // Scroll to top button
+    setupScrollToTop();
+}
+
+function setupFeedbackListeners() {
+    const feedbackToggle = document.getElementById('feedback-toggle');
+    const feedbackPanel = document.getElementById('feedback-panel');
+    const feedbackClose = document.getElementById('feedback-close');
+    const feedbackForm = document.getElementById('feedback-form');
+    
+    if (feedbackToggle) {
+        feedbackToggle.addEventListener('click', function() {
+            feedbackPanel.classList.toggle('active');
+        });
+    }
+    
+    if (feedbackClose) {
+        feedbackClose.addEventListener('click', function() {
+            feedbackPanel.classList.remove('active');
+        });
+    }
+    
+    if (feedbackForm) {
+        feedbackForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            submitFeedback();
+        });
+    }
+    
+    // Close feedback panel when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.feedback-bubble')) {
+            feedbackPanel.classList.remove('active');
+        }
+    });
 }
 
 function toggleMobileMenu() {
@@ -380,6 +544,9 @@ function toggleQuickFilter(btn) {
 }
 
 function displayJobListings(jobs) {
+    // Update results header
+    updateResultsHeader(jobs);
+    
     if (jobs.length === 0) {
         jobListingsContainer.innerHTML = `
             <div class="no-results">
@@ -391,8 +558,8 @@ function displayJobListings(jobs) {
         return;
     }
     
-    jobListingsContainer.innerHTML = jobs.map(job => `
-        <div class="job-card" data-job-id="${job.id}">
+    jobListingsContainer.innerHTML = jobs.map((job, index) => `
+        <div class="job-card" data-job-id="${job.id}" style="animation-delay: ${index * 0.1}s">
             <h3>${job.title}</h3>
             <div class="job-company">${job.company}</div>
             <div class="job-location">
@@ -413,10 +580,117 @@ function displayJobListings(jobs) {
     `).join('');
 }
 
+function updateResultsHeader(jobs) {
+    const resultsHeader = document.getElementById('results-header');
+    const resultsCount = document.getElementById('results-count');
+    
+    if (jobs.length > 0) {
+        resultsHeader.style.display = 'flex';
+        resultsCount.textContent = `Showing ${jobs.length} job${jobs.length === 1 ? '' : 's'}`;
+    } else {
+        resultsHeader.style.display = 'none';
+    }
+}
+
 function applyToJob(jobId) {
-    const job = jobListings.find(j => j.id === jobId);
+    const job = jobListings.find(j => j.id == jobId);
     if (job) {
-        alert(`Application submitted for ${job.title} at ${job.company}!\n\nIn a real application, this would redirect to the company's application portal or open an application form.`);
+        if (job.url) {
+            // Open external job URL in new tab
+            window.open(job.url, '_blank');
+        } else {
+            // Show application modal or redirect to application form
+            showApplicationModal(job);
+        }
+    }
+}
+
+function showApplicationModal(job) {
+    const modal = document.createElement('div');
+    modal.className = 'application-modal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Apply for ${job.title}</h3>
+                <button class="close-modal" onclick="closeApplicationModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Company:</strong> ${job.company}</p>
+                <p><strong>Location:</strong> ${job.location}</p>
+                <p><strong>Salary:</strong> ${job.salary}</p>
+                <form id="application-form">
+                    <div class="form-group">
+                        <label for="applicant-name">Full Name:</label>
+                        <input type="text" id="applicant-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="applicant-email">Email:</label>
+                        <input type="email" id="applicant-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="applicant-phone">Phone:</label>
+                        <input type="tel" id="applicant-phone">
+                    </div>
+                    <div class="form-group">
+                        <label for="cover-letter">Cover Letter:</label>
+                        <textarea id="cover-letter" rows="4" placeholder="Tell us why you're interested in this position..."></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" onclick="closeApplicationModal()">Cancel</button>
+                        <button type="submit">Submit Application</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Handle form submission
+    document.getElementById('application-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        submitApplication(job);
+    });
+}
+
+function submitApplication(job) {
+    const formData = {
+        name: document.getElementById('applicant-name').value,
+        email: document.getElementById('applicant-email').value,
+        phone: document.getElementById('applicant-phone').value,
+        coverLetter: document.getElementById('cover-letter').value,
+        jobId: job.id,
+        jobTitle: job.title,
+        company: job.company
+    };
+    
+    // Simulate application submission
+    console.log('Application submitted:', formData);
+    
+    closeApplicationModal();
+    
+    // Show success message
+    const successMsg = document.createElement('div');
+    successMsg.className = 'success-notification';
+    successMsg.innerHTML = `
+        <div class="success-content">
+            <i class="fas fa-check-circle"></i>
+            <h4>Application Submitted!</h4>
+            <p>Your application for ${job.title} at ${job.company} has been submitted successfully.</p>
+        </div>
+    `;
+    
+    document.body.appendChild(successMsg);
+    
+    setTimeout(() => {
+        document.body.removeChild(successMsg);
+    }, 5000);
+}
+
+function closeApplicationModal() {
+    const modal = document.querySelector('.application-modal');
+    if (modal) {
+        document.body.removeChild(modal);
     }
 }
 
@@ -560,3 +834,171 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+
+// Feedback submission functionality
+function submitFeedback() {
+    const feedbackType = document.getElementById('feedback-type').value;
+    const feedbackMessage = document.getElementById('feedback-message').value;
+    const feedbackEmail = document.getElementById('feedback-email').value;
+    
+    if (!feedbackType || !feedbackMessage) {
+        alert('Please fill in all required fields.');
+        return;
+    }
+    
+    const feedbackData = {
+        type: feedbackType,
+        message: feedbackMessage,
+        email: feedbackEmail,
+        timestamp: new Date().toISOString(),
+        userAgent: navigator.userAgent,
+        url: window.location.href
+    };
+    
+    // Simulate feedback submission
+    console.log('Feedback submitted:', feedbackData);
+    
+    // In a real application, you would send this to your backend
+    // fetch('/api/feedback', {
+    //     method: 'POST',
+    //     headers: { 'Content-Type': 'application/json' },
+    //     body: JSON.stringify(feedbackData)
+    // });
+    
+    // Show success message
+    showFeedbackSuccess();
+    
+    // Clear form
+    document.getElementById('feedback-form').reset();
+}
+
+function showFeedbackSuccess() {
+    const feedbackForm = document.getElementById('feedback-form');
+    const feedbackSuccess = document.getElementById('feedback-success');
+    
+    // Hide form and show success message
+    feedbackForm.style.display = 'none';
+    feedbackSuccess.style.display = 'block';
+    
+    // Reset after 3 seconds
+    setTimeout(() => {
+        feedbackForm.style.display = 'block';
+        feedbackSuccess.style.display = 'none';
+        
+        // Close feedback panel
+        document.getElementById('feedback-panel').classList.remove('active');
+    }, 3000);
+}
+
+// Sorting functionality
+function setupSortingListeners() {
+    const sortSelect = document.getElementById('sort-select');
+    if (sortSelect) {
+        sortSelect.addEventListener('change', function() {
+            sortJobs(this.value);
+        });
+    }
+}
+
+function sortJobs(sortBy) {
+    let sortedJobs = [...jobListings];
+    
+    switch (sortBy) {
+        case 'title':
+            sortedJobs.sort((a, b) => a.title.localeCompare(b.title));
+            break;
+        case 'company':
+            sortedJobs.sort((a, b) => a.company.localeCompare(b.company));
+            break;
+        case 'salary':
+            sortedJobs.sort((a, b) => {
+                // Extract numeric values from salary strings for comparison
+                const getSalaryValue = (salary) => {
+                    const match = salary.match(/\d+/);
+                    return match ? parseInt(match[0]) : 0;
+                };
+                return getSalaryValue(b.salary) - getSalaryValue(a.salary);
+            });
+            break;
+        case 'posted':
+        default:
+            sortedJobs.sort((a, b) => {
+                // Parse posted dates and sort by recency
+                const getDateValue = (posted) => {
+                    if (posted.includes('day')) return parseInt(posted.match(/\d+/)?.[0] || '0');
+                    if (posted.includes('week')) return parseInt(posted.match(/\d+/)?.[0] || '0') * 7;
+                    return 0;
+                };
+                return getDateValue(a.posted) - getDateValue(b.posted);
+            });
+            break;
+    }
+    
+    // Apply current filters to sorted jobs
+    applyFiltersToJobs(sortedJobs);
+}
+
+function applyFiltersToJobs(jobs) {
+    const locationValue = locationFilter.value;
+    const typeValue = typeFilter.value;
+    const majorValue = majorFilter.value;
+    const searchTerm = searchInput.value.toLowerCase().trim();
+    
+    let filteredJobs = jobs;
+    
+    // Apply search filter
+    if (searchTerm) {
+        filteredJobs = filteredJobs.filter(job => 
+            job.title.toLowerCase().includes(searchTerm) ||
+            job.company.toLowerCase().includes(searchTerm) ||
+            job.description.toLowerCase().includes(searchTerm) ||
+            job.tags.some(tag => tag.toLowerCase().includes(searchTerm))
+        );
+    }
+    
+    // Apply location filter
+    if (locationValue) {
+        filteredJobs = filteredJobs.filter(job => {
+            if (locationValue === 'remote') return job.location.toLowerCase().includes('remote');
+            if (locationValue === 'jacksonville') return job.location.toLowerCase().includes('jacksonville');
+            if (locationValue === 'florida') return job.location.toLowerCase().includes('fl');
+            return true;
+        });
+    }
+    
+    // Apply type filter
+    if (typeValue) {
+        filteredJobs = filteredJobs.filter(job => job.type === typeValue);
+    }
+    
+    // Apply major filter
+    if (majorValue) {
+        filteredJobs = filteredJobs.filter(job => job.major === majorValue);
+    }
+    
+    displayJobListings(filteredJobs);
+}
+
+// Scroll to top functionality
+function setupScrollToTop() {
+    const scrollToTopBtn = document.getElementById('scroll-to-top');
+    
+    if (scrollToTopBtn) {
+        // Show/hide button based on scroll position
+        window.addEventListener('scroll', function() {
+            if (window.pageYOffset > 300) {
+                scrollToTopBtn.classList.add('visible');
+            } else {
+                scrollToTopBtn.classList.remove('visible');
+            }
+        });
+        
+        // Handle click
+        scrollToTopBtn.addEventListener('click', function() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    }
+}
