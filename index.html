@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UNF Student Career Hub</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="nav-logo">
+                    <h2><i class="fas fa-graduation-cap"></i> UNF Career Hub</h2>
+                </div>
+                <ul class="nav-menu">
+                    <li><a href="#home" class="nav-link active">Home</a></li>
+                    <li><a href="#jobs" class="nav-link">Job Listings</a></li>
+                    <li><a href="#majors" class="nav-link">Majors</a></li>
+                    <li><a href="#unf-resources" class="nav-link">UNF Resources</a></li>
+                    <li><a href="#about" class="nav-link">About</a></li>
+                </ul>
+                <div class="hamburger">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section id="home" class="hero">
+            <div class="hero-content">
+                <h1>Find Your Perfect Career Opportunity</h1>
+                <p>Connecting UNF students aged 20-24 with internships, jobs, and career opportunities</p>
+                <div class="search-container">
+                    <input type="text" id="job-search" placeholder="Search for jobs, internships, companies...">
+                    <button id="search-btn"><i class="fas fa-search"></i></button>
+                </div>
+                <div class="quick-filters">
+                    <button class="filter-btn" data-type="internship">Internships</button>
+                    <button class="filter-btn" data-type="entry-level">Entry Level</button>
+                    <button class="filter-btn" data-type="part-time">Part Time</button>
+                    <button class="filter-btn" data-type="remote">Remote</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Job Listings Section -->
+        <section id="jobs" class="jobs-section">
+            <div class="container">
+                <h2>Latest Opportunities</h2>
+                <div class="filters-container">
+                    <div class="filter-group">
+                        <label for="location-filter">Location:</label>
+                        <select id="location-filter">
+                            <option value="">All Locations</option>
+                            <option value="jacksonville">Jacksonville, FL</option>
+                            <option value="florida">Florida</option>
+                            <option value="remote">Remote</option>
+                            <option value="nationwide">Nationwide</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="type-filter">Type:</label>
+                        <select id="type-filter">
+                            <option value="">All Types</option>
+                            <option value="internship">Internship</option>
+                            <option value="entry-level">Entry Level</option>
+                            <option value="part-time">Part Time</option>
+                            <option value="full-time">Full Time</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="major-filter">Major:</label>
+                        <select id="major-filter">
+                            <option value="">All Majors</option>
+                            <option value="business">Business</option>
+                            <option value="engineering">Engineering</option>
+                            <option value="computer-science">Computer Science</option>
+                            <option value="education">Education</option>
+                            <option value="health-sciences">Health Sciences</option>
+                            <option value="arts">Arts & Letters</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="job-listings" class="job-listings">
+                    <!-- Job listings will be populated by JavaScript -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Majors Section -->
+        <section id="majors" class="majors-section">
+            <div class="container">
+                <h2>Explore by College Major</h2>
+                <div class="majors-tabs">
+                    <button class="tab-btn active" data-tab="all">All Majors</button>
+                    <button class="tab-btn" data-tab="business">Business</button>
+                    <button class="tab-btn" data-tab="engineering">Engineering</button>
+                    <button class="tab-btn" data-tab="computer-science">Computer Science</button>
+                    <button class="tab-btn" data-tab="education">Education</button>
+                    <button class="tab-btn" data-tab="health-sciences">Health Sciences</button>
+                    <button class="tab-btn" data-tab="arts">Arts & Letters</button>
+                    <button class="tab-btn" data-tab="public">Public Service</button>
+                </div>
+                <div id="majors-content" class="majors-content">
+                    <!-- Major-specific content will be populated by JavaScript -->
+                </div>
+            </div>
+        </section>
+
+        <!-- UNF Resources Section -->
+        <section id="unf-resources" class="unf-resources">
+            <div class="container">
+                <h2>UNF Career Resources</h2>
+                <div class="resources-grid">
+                    <div class="resource-card">
+                        <i class="fas fa-building"></i>
+                        <h3>Career Services</h3>
+                        <p>Professional career counseling and guidance</p>
+                        <a href="https://www.unf.edu/career/" target="_blank" class="resource-link">Visit Career Services</a>
+                    </div>
+                    <div class="resource-card">
+                        <i class="fas fa-handshake"></i>
+                        <h3>Job Fair Events</h3>
+                        <p>Connect with employers at UNF career fairs</p>
+                        <a href="https://www.unf.edu/career/students/job-search/career-fairs.html" target="_blank" class="resource-link">View Events</a>
+                    </div>
+                    <div class="resource-card">
+                        <i class="fas fa-file-alt"></i>
+                        <h3>Resume Builder</h3>
+                        <p>Create professional resumes with UNF templates</p>
+                        <a href="https://www.unf.edu/career/students/resumes-cover-letters/" target="_blank" class="resource-link">Build Resume</a>
+                    </div>
+                    <div class="resource-card">
+                        <i class="fas fa-comments"></i>
+                        <h3>Interview Prep</h3>
+                        <p>Practice interviews and improve your skills</p>
+                        <a href="https://www.unf.edu/career/students/interviewing/" target="_blank" class="resource-link">Prepare Now</a>
+                    </div>
+                    <div class="resource-card">
+                        <i class="fas fa-users"></i>
+                        <h3>Alumni Network</h3>
+                        <p>Connect with UNF alumni in your field</p>
+                        <a href="https://www.unf.edu/alumni/" target="_blank" class="resource-link">Join Network</a>
+                    </div>
+                    <div class="resource-card">
+                        <i class="fas fa-laptop"></i>
+                        <h3>Online Job Portal</h3>
+                        <p>Access UNF's exclusive job database</p>
+                        <a href="https://unf-csm.symplicity.com/students/" target="_blank" class="resource-link">Search Jobs</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="about-section">
+            <div class="container">
+                <h2>About UNF Career Hub</h2>
+                <div class="about-content">
+                    <p>The UNF Career Hub is designed specifically for University of North Florida students aged 20-24, providing a centralized platform to discover internships, entry-level positions, and career opportunities.</p>
+                    <p>Our platform aggregates opportunities from various sources and provides direct access to UNF's career resources, making your job search more efficient and targeted.</p>
+                    <div class="stats">
+                        <div class="stat">
+                            <h3>500+</h3>
+                            <p>Active Job Listings</p>
+                        </div>
+                        <div class="stat">
+                            <h3>50+</h3>
+                            <p>Partner Companies</p>
+                        </div>
+                        <div class="stat">
+                            <h3>1000+</h3>
+                            <p>Students Helped</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>UNF Career Hub</h3>
+                    <p>Connecting students with their future careers</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#jobs">Job Listings</a></li>
+                        <li><a href="#majors">Majors</a></li>
+                        <li><a href="#unf-resources">UNF Resources</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact UNF Career Services</h4>
+                    <p>Phone: (904) 620-2955</p>
+                    <p>Email: career.services@unf.edu</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 University of North Florida. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
