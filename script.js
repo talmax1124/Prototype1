@@ -346,6 +346,16 @@ document.addEventListener('DOMContentLoaded', function() {
 async function initializeApp() {
     setupEventListeners();
     
+    // Track page view
+    if (typeof notionService !== 'undefined') {
+        notionService.logPageView({
+            page: 'home',
+            section: 'initialization'
+        }).catch(error => {
+            console.error('Failed to log page view to Notion:', error);
+        });
+    }
+    
     // Show loading state
     jobListingsContainer.innerHTML = '<div class="loading">Loading job opportunities...</div>';
     
@@ -366,24 +376,41 @@ async function initializeApp() {
 
 function setupEventListeners() {
     // Mobile menu toggle
-    hamburger.addEventListener('click', toggleMobileMenu);
+    hamburger.addEventListener('click', function() {
+        trackButtonClick('menu', 'Mobile Hamburger', '', 'navigation');
+        toggleMobileMenu();
+    });
     
     // Search functionality
-    searchBtn.addEventListener('click', performSearch);
+    searchBtn.addEventListener('click', function() {
+        trackButtonClick('search', 'Search Button', searchInput.value, 'search');
+        performSearch();
+    });
     searchInput.addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
+            trackButtonClick('search', 'Search Enter Key', searchInput.value, 'search');
             performSearch();
         }
     });
     
     // Filter functionality
-    locationFilter.addEventListener('change', applyFilters);
-    typeFilter.addEventListener('change', applyFilters);
-    majorFilter.addEventListener('change', applyFilters);
+    locationFilter.addEventListener('change', function() {
+        trackButtonClick('filter', 'Location Filter', this.value, 'filters');
+        applyFilters();
+    });
+    typeFilter.addEventListener('change', function() {
+        trackButtonClick('filter', 'Type Filter', this.value, 'filters');
+        applyFilters();
+    });
+    majorFilter.addEventListener('change', function() {
+        trackButtonClick('filter', 'Major Filter', this.value, 'filters');
+        applyFilters();
+    });
     
     // Quick filter buttons
     quickFilterBtns.forEach(btn => {
         btn.addEventListener('click', function() {
+            trackButtonClick('quick-filter', this.textContent, this.dataset.type, 'quick-filters');
             toggleQuickFilter(this);
         });
     });
@@ -391,6 +418,7 @@ function setupEventListeners() {
     // Major tabs
     tabBtns.forEach(btn => {
         btn.addEventListener('click', function() {
+            trackButtonClick('tab', this.textContent, this.dataset.tab, 'majors');
             switchMajorTab(this);
         });
     });
@@ -400,6 +428,7 @@ function setupEventListeners() {
         link.addEventListener('click', function(e) {
             e.preventDefault();
             const targetId = this.getAttribute('href');
+            trackButtonClick('navigation', this.textContent, targetId, 'navigation');
             const targetSection = document.querySelector(targetId);
             if (targetSection) {
                 targetSection.scrollIntoView({ behavior: 'smooth' });
@@ -432,12 +461,14 @@ function setupFeedbackListeners() {
     
     if (feedbackToggle) {
         feedbackToggle.addEventListener('click', function() {
+            trackButtonClick('feedback', 'Feedback Toggle', feedbackPanel.classList.contains('active') ? 'close' : 'open', 'feedback');
             feedbackPanel.classList.toggle('active');
         });
     }
     
     if (feedbackClose) {
         feedbackClose.addEventListener('click', function() {
+            trackButtonClick('feedback', 'Feedback Close', 'close', 'feedback');
             feedbackPanel.classList.remove('active');
         });
     }
@@ -445,6 +476,7 @@ function setupFeedbackListeners() {
     if (feedbackForm) {
         feedbackForm.addEventListener('submit', function(e) {
             e.preventDefault();
+            trackButtonClick('feedback', 'Feedback Submit', 'submit', 'feedback');
             submitFeedback();
         });
     }
@@ -595,6 +627,9 @@ function updateResultsHeader(jobs) {
 function applyToJob(jobId) {
     const job = jobListings.find(j => j.id == jobId);
     if (job) {
+        // Track apply button click
+        trackButtonClick('apply', 'Apply Now', `${job.title} at ${job.company}`, 'job-listings');
+        
         if (job.url) {
             // Open external job URL in new tab
             window.open(job.url, '_blank');
@@ -603,6 +638,25 @@ function applyToJob(jobId) {
             showApplicationModal(job);
         }
     }
+}
+
+function trackButtonClick(buttonType, buttonText, targetValue, section) {
+    const buttonData = {
+        buttonType,
+        buttonText,
+        targetValue,
+        section
+    };
+    
+    // Log to Notion
+    if (typeof notionService !== 'undefined') {
+        notionService.logButtonClick(buttonData).catch(error => {
+            console.error('Failed to log button click to Notion:', error);
+        });
+    }
+    
+    // Also log to console for debugging
+    console.log('Button clicked:', buttonData);
 }
 
 function showApplicationModal(job) {
@@ -664,7 +718,14 @@ function submitApplication(job) {
         company: job.company
     };
     
-    // Simulate application submission
+    // Log to Notion
+    if (typeof notionService !== 'undefined') {
+        notionService.logJobApplication(formData).catch(error => {
+            console.error('Failed to log application to Notion:', error);
+        });
+    }
+    
+    // Also log to console for debugging
     console.log('Application submitted:', formData);
     
     closeApplicationModal();
@@ -855,7 +916,14 @@ function submitFeedback() {
         url: window.location.href
     };
     
-    // Simulate feedback submission
+    // Log to Notion
+    if (typeof notionService !== 'undefined') {
+        notionService.logFeedback(feedbackData).catch(error => {
+            console.error('Failed to log feedback to Notion:', error);
+        });
+    }
+    
+    // Also log to console for debugging
     console.log('Feedback submitted:', feedbackData);
     
     // In a real application, you would send this to your backend
