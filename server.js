@@ -15,6 +15,9 @@ const notion = new Client({
 app.use(cors());
 app.use(express.json());
 
+// Serve static files (HTML, CSS, JS)
+app.use(express.static('.'));
+
 // Database IDs from environment variables
 const databases = {
     applications: process.env.NOTION_APPLICATIONS_DB,
@@ -180,8 +183,15 @@ app.get('/api/health', (req, res) => {
     res.json({ status: 'OK', message: 'UNF Career Hub API is running' });
 });
 
+// Catch-all handler: send back index.html for any non-API routes
+app.get('*', (req, res) => {
+    if (!req.path.startsWith('/api')) {
+        res.sendFile(__dirname + '/index.html');
+    }
+});
+
 // Start server
-app.listen(port, () => {
+app.listen(port, '0.0.0.0', () => {
     console.log(`UNF Career Hub API server running on port ${port}`);
-    console.log(`Health check: http://localhost:${port}/api/health`);
+    console.log(`Health check available at /api/health`);
 });

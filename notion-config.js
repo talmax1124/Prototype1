@@ -1,8 +1,10 @@
 // Notion Integration Service
 class NotionService {
     constructor() {
-        // Backend API URL
-        this.backendUrl = 'http://localhost:3001/api';
+        // Backend API URL - dynamically set based on environment
+        this.backendUrl = window.location.hostname === 'localhost' 
+            ? 'http://localhost:3001/api' 
+            : `${window.location.protocol}//${window.location.host}/api`;
         this.demoMode = false; // Use backend API
         
         // Initialize demo storage as fallback
